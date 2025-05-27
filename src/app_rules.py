@@ -401,12 +401,36 @@ class App(ttk.Frame):
                 category_data["my_courses"] = []
 
             self.toml_data["categories"][category_name] = category_data
+        # セカンダリカテゴリを更新
+        if "secondary_categories" not in self.toml_data:
+            self.toml_data["secondary_categories"] = {}
+        for category_name, vars_dict in self.secondary_category_vars.items():
+            category_data = {}
+
+            # 最大単位数
+            try:
+                category_data["max_credits"] = int(vars_dict["max_credits"].get())
+            except ValueError:
+                category_data["max_credits"] = 0
+
+            # カテゴリリスト
+            category_text = vars_dict["category"].get(1.0, tk.END).strip()
+            if category_text:
+                category_data["category"] = [
+                    line.strip() for line in category_text.split("\n") if line.strip()
+                ]
+            else:
+                category_data["category"] = []
+
+            self.toml_data["secondary_categories"][category_name] = category_data
 
     def get_category_names(self):
         if "columns_in_lectures" in self.toml_data:
+            root_path = os.path.dirname(os.path.abspath(__file__))
+            lecture_csv_path = os.path.join(root_path, "lectures.csv")
             l = Lectures(
                 self.toml_data,
-                "src/csv/WQ_講義科目情報確認（芸工IDコース）.csv",
+                lecture_csv_path,
             )
             categories = l.get_category_names(
                 self.toml_data["columns_in_lectures"]["category"]
