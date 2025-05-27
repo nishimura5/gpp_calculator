@@ -70,10 +70,8 @@ class App(ttk.Frame):
         )
 
     def calculate(self):
-        lecture_csv = "WQ_講義科目情報確認（芸工IDコース）.csv"
-        student_csv = "test_case_1.csv"
         self.clear_tree()
-        calc_res = calculator.calc_all(lecture_csv, student_csv)
+        calc_res = calculator.calc_all()
         if calc_res:
             self.export_btn["state"] = "normal"
             self.export_btn["command"] = lambda: self.export(calc_res)

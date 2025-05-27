@@ -123,18 +123,20 @@ def extrapolate_by_gpa(toml, gpt_score, total_credits, gpa):
     return result
 
 
-def calc_all(lecture_csv_path: str, student_csv_path: str, csv_encoding: str = "utf-8"):
-    rules_toml_path = os.path.join(os.path.dirname(__file__), "rules.toml")
+def calc_all(csv_encoding: str = "utf-8"):
+    root_path = os.path.dirname(os.path.abspath(__file__))
+    lecture_csv_path = os.path.join(root_path, "lectures.csv")
+    student_csv_path = os.path.join(root_path, "students.csv")
+    rules_toml_path = os.path.join(root_path, "rules.toml")
     with open(rules_toml_path, "rb") as f:
         toml = tomllib.load(f)
 
-    log_path = os.path.join(os.path.dirname(__file__), "log")
+    log_path = os.path.join(root_path, "log")
     os.makedirs(log_path, exist_ok=True)
 
-    csv_path = os.path.join(os.path.dirname(__file__), "csv", lecture_csv_path)
     l = lectures.Lectures(
         toml,
-        csv_path,
+        lecture_csv_path,
     )
 
     lectures_df = l.get_lectures()
