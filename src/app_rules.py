@@ -31,16 +31,14 @@ class App(ttk.Frame):
 
     def create_widgets(self):
         # --- Make the whole window scrollable ---
-        canvas = tk.Canvas(self)
+        canvas = tk.Canvas(self, relief="flat", highlightthickness=0, borderwidth=0)
         scrollbar = ttk.Scrollbar(self, orient="vertical", command=canvas.yview)
         canvas.configure(yscrollcommand=scrollbar.set)
 
         canvas.pack(side="left", fill=tk.BOTH, expand=True)
         scrollbar.pack(side="right", fill="y")
 
-        main_frame = ttk.Frame(canvas)
-        self.main_frame = main_frame  # for possible later use
-
+        main_frame = ttk.Frame(self)
         canvas.create_window((0, 0), window=main_frame, anchor="nw")
 
         def _on_frame_configure(event):
@@ -251,7 +249,7 @@ class App(ttk.Frame):
         ttk.Label(cat_frame, text="Category:").grid(
             row=2, column=0, sticky=tk.NW, padx=(0, 10), pady=(10, 0)
         )
-        category_text = tk.Text(cat_frame, height=4, width=50)
+        category_text = tk.Text(cat_frame, height=4, width=50, relief="flat")
         category_text.grid(row=2, column=1, columnspan=3, sticky="ew", pady=(10, 0))
 
         # カテゴリリストの内容を設定
@@ -267,7 +265,7 @@ class App(ttk.Frame):
         ttk.Label(cat_frame, text="Pooled:").grid(
             row=3, column=0, sticky=tk.NW, padx=(0, 10), pady=(10, 0)
         )
-        my_courses_text = tk.Text(cat_frame, height=3, width=50)
+        my_courses_text = tk.Text(cat_frame, height=3, width=50, relief="flat")
         my_courses_text.grid(row=3, column=1, columnspan=3, sticky="ew", pady=(10, 0))
 
         # 自コースリストの内容を設定
@@ -313,7 +311,7 @@ class App(ttk.Frame):
         ttk.Label(cat_frame, text="Category:").grid(
             row=3, column=0, sticky=tk.W, padx=(0, 10), pady=(10, 0)
         )
-        category_text = tk.Text(cat_frame, height=4, width=50)
+        category_text = tk.Text(cat_frame, height=4, width=50, relief="flat")
         category_text.grid(row=3, column=1, columnspan=3, sticky="ew", pady=(10, 0))
         # categoryの内容を設定
         categories = category_data.get("category", [])
@@ -442,8 +440,8 @@ class App(ttk.Frame):
             category_window = tk.Toplevel(self.master)
             category_window.title("Categories")
             category_window.geometry("400x500+300+100")
-            category_text = tk.Text(category_window, wrap=tk.WORD)
-            category_text.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+            category_text = tk.Text(category_window, wrap=tk.WORD, relief="flat")
+            category_text.pack(fill=tk.BOTH, expand=True, padx=15, pady=15)
             category_text.insert(tk.END, "\n".join(categories))
 
     def reset_to_default(self):
