@@ -7,6 +7,7 @@ import ttkthemes
 
 import app_rules
 import calculator
+from csv_export import export_csv
 
 IS_DARWIN = sys.platform.startswith("darwin")
 
@@ -69,12 +70,13 @@ class App(ttk.Frame):
             ),
         )
 
+        self.res_table = []
+
     def calculate(self):
         self.clear_tree()
         calc_res = calculator.calc_all()
         if calc_res:
             self.export_btn["state"] = "normal"
-            self.export_btn["command"] = lambda: self.export(calc_res)
         else:
             self.export_btn["state"] = "disabled"
         for res in calc_res:
@@ -88,15 +90,15 @@ class App(ttk.Frame):
                     f"{res['extrapolate_gpp']:.1f}",
                 ),
             )
+        self.res_table = calc_res
 
     def clear_tree(self):
         for item in self.tree.get_children():
             self.tree.delete(item)
         self.export_btn["state"] = "disabled"
-        self.export_btn["command"] = lambda: None
 
     def export(self):
-        pass
+        export_csv(self.res_table, "gpp_results.csv")
 
     def open_settings(self):
         dlg_modal = tk.Toplevel(self)
