@@ -31,8 +31,8 @@ def calc_gpt_score(toml, lectures_df, grade_df):
     ]
     pl.check_undefined_lectures(t_categories)
 
-    gpts = {k: {"credit": 0, "gpt": 0} for k in t_categories.keys()}
-    gpts["Overflow_pool"] = {"credit": 0, "gpt": 0}
+    gpts = {k: {"credit": 0, "gpp": 0} for k in t_categories.keys()}
+    gpts["Overflow_pool"] = {"credit": 0, "gpp": 0}
 
     # CreditPool
     credit_pools = {}
@@ -84,15 +84,15 @@ def calc_gpt_score(toml, lectures_df, grade_df):
             if k in credit_pools:
                 got_credits = credit_pools[k].use_credits(shortage_credits)
                 total_credits += got_credits
-                log_str += f"Got from secondary categories: {got_credits}\n"
+                log_str += f"<Got from secondary categories: {got_credits}>\n"
 
-        log_str += f"合計ポイント: {total_point:.2f}  合計単位数: {total_credits}/{max_credits}\n"
+        log_str += f"Total points: {total_point:.2f}  Total credits: {total_credits}/{max_credits}\n"
         if len(b_df) > 0:
             log_str += "--- Overflow ---\n"
             log_str += str(b_df[use_cols].set_index(col["key"])) + "\n"
 
         gpts[k]["credits"] = total_credits
-        gpts[k]["gpt"] = total_point
+        gpts[k]["gpp"] = total_point
 
         # b_dfのうちis_homeがTrueの行を抽出してpool_dfに追加
         if b_df.columns.str.contains("is_home").any():
@@ -101,25 +101,25 @@ def calc_gpt_score(toml, lectures_df, grade_df):
     total_point = pool_df["point"].sum()
     total_credits = pool_df[col["credit"]].sum()
     gpts["Overflow_pool"]["credits"] = 0
-    gpts["Overflow_pool"]["gpt"] = total_point
+    gpts["Overflow_pool"]["gpp"] = total_point
     log_str += "\n======== [Overflow Pool] ========\n"
     log_str += str(pool_df[use_cols].set_index(col["key"])) + "\n"
-    log_str += f"合計ポイント: {total_point:.2f}\n"
+    log_str += f"Total points: {total_point:.2f}\n"
 
     return gpts, log_str
 
 
-def extrapolate_by_gpa(toml, gpt_score, total_credits, gpa):
+def extrapolate_by_gpa(toml, gpp, total_credits, gpa):
     target_credits = toml["params"]["extrapolate_target_credits"]
     if not isinstance(target_credits, (int, float)):
-        raise ValueError("total_gpt must be an integer or float")
+        raise ValueError("total_gpp must be an integer or float")
     else:
         target_credits = int(target_credits)
 
     if total_credits >= target_credits:
-        result = gpt_score
+        result = gpp
     else:
-        result = gpt_score + gpa * (target_credits - total_credits)
+        result = gpp + gpa * (target_credits - total_credits)
     return result
 
 
@@ -134,12 +134,12 @@ def calc_all(csv_encoding: str = "utf-8"):
     log_path = os.path.join(root_path, "log")
     os.makedirs(log_path, exist_ok=True)
 
-    l = lectures.Lectures(
+    lec = lectures.Lectures(
         toml,
         lecture_csv_path,
     )
 
-    lectures_df = l.get_lectures()
+    lectures_df = lec.get_lectures()
 
     students_df = pd.read_csv(student_csv_path, encoding=csv_encoding)
     students_list = students_df["学生番号"].unique().tolist()
@@ -148,7 +148,7 @@ def calc_all(csv_encoding: str = "utf-8"):
     for student_id in students_list:
         res_dict = {
             "student_id": student_id,
-            "gpt_score": 0,
+            "gpp": 0,
             "total_credits": 0,
             "extrapolate_gpt": 0,
         }
@@ -157,7 +157,7 @@ def calc_all(csv_encoding: str = "utf-8"):
         grade_df = students_df[students_df["学生番号"] == student_id]
 
         lecture_key_list = grade_df["講義コード"].unique().tolist()
-        l.check_undefined_lectures(lecture_key_list)
+        lec.check_undefined_lectures(lecture_key_list)
 
         gpts, log_str = calc_gpt_score(toml, lectures_df, grade_df)
         with open(
@@ -167,12 +167,12 @@ def calc_all(csv_encoding: str = "utf-8"):
         gpt_score = 0
         total_credits = 0
         for k, v in gpts.items():
-            print(f"{k}: {v['gpt']:.2f} Credits: {v['credits']}")
-            gpt_score += v["gpt"]
+            print(f"{k}: {v['gpp']:.2f} Credits: {v['credits']}")
+            gpt_score += v["gpp"]
             total_credits += v["credits"]
         extrapolate_gpt = extrapolate_by_gpa(toml, gpt_score, total_credits, 3.8)
-        res_dict["gpt_score"] = gpt_score
+        res_dict["gpp"] = gpt_score
         res_dict["total_credits"] = total_credits
-        res_dict["extrapolate_gpt"] = extrapolate_gpt
+        res_dict["extrapolate_gpp"] = extrapolate_gpt
         calc_res.append(res_dict)
     return calc_res

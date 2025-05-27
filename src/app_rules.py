@@ -428,11 +428,11 @@ class App(ttk.Frame):
         if "columns_in_lectures" in self.toml_data:
             root_path = os.path.dirname(os.path.abspath(__file__))
             lecture_csv_path = os.path.join(root_path, "lectures.csv")
-            l = Lectures(
+            lec = Lectures(
                 self.toml_data,
                 lecture_csv_path,
             )
-            categories = l.get_category_names(
+            categories = lec.get_category_names(
                 self.toml_data["columns_in_lectures"]["category"]
             )
             # remove np.nan or empty categories
