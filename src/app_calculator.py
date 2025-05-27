@@ -41,14 +41,16 @@ class App(ttk.Frame):
 
         self.tree = ttk.Treeview(
             tree_frame,
-            columns=("student_id", "gpp", "total_credits", "extrapolate_gpp"),
+            columns=("student_id", "student_name", "gpp", "total_credits", "extrapolate_gpp"),
             show="headings",
         )
         self.tree.heading("student_id", text="Student ID")
+        self.tree.heading("student_name", text="Student Name")
         self.tree.heading("gpp", text="Points")
         self.tree.heading("total_credits", text="Total Credits")
         self.tree.heading("extrapolate_gpp", text="Extrapolate Points")
         self.tree.column("student_id", width=150)
+        self.tree.column("student_name", width=150)
         self.tree.column("gpp", width=100)
         self.tree.column("total_credits", width=100)
         self.tree.column("extrapolate_gpp", width=150)
@@ -85,6 +87,7 @@ class App(ttk.Frame):
                 tk.END,
                 values=(
                     res["student_id"],
+                    res["student_name"],
                     f"{res['gpp']:.1f}",
                     f"{res['total_credits']:.1f}",
                     f"{res['extrapolate_gpp']:.1f}",

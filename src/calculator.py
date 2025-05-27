@@ -148,6 +148,9 @@ def calc_all(csv_encoding: str = "utf-8"):
     for student_id in students_list:
         res_dict = {
             "student_id": student_id,
+            "student_name": students_df[students_df["学生番号"] == student_id][
+                "氏名"
+            ].values[0],
             "gpp": 0,
             "total_credits": 0,
             "extrapolate_gpt": 0,
