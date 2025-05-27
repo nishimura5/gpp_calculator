@@ -43,6 +43,7 @@ def calc_gpt_score(toml, lectures_df, grade_df):
 
     # concat用のDataFrameを作成、column名を揃える
     pool_df = pd.DataFrame(columns=lectures_df.columns)
+    used_by_secondary_credits = 0
     for k, v in t_categories.items():
         log_str += f"\n======== [{k}] ========\n"
         categories = v["category"]
@@ -84,7 +85,8 @@ def calc_gpt_score(toml, lectures_df, grade_df):
             if k in credit_pools:
                 got_credits = credit_pools[k].use_credits(shortage_credits)
                 total_credits += got_credits
-                log_str += f"<Got from secondary categories: {got_credits}>\n"
+                log_str += f"<From secondary categories: {got_credits:+}>\n"
+                used_by_secondary_credits += got_credits
 
         log_str += f"Total points: {total_point:.2f}  Total credits: {total_credits}/{max_credits}\n"
         if len(b_df) > 0:
@@ -99,12 +101,14 @@ def calc_gpt_score(toml, lectures_df, grade_df):
             pool_df = pd.concat([pool_df, b_df[b_df["is_home"]]])
 
     total_point = pool_df["point"].sum()
-    total_credits = pool_df[col["credit"]].sum()
-    gpts["Overflow_pool"]["credits"] = 0
+    pool_credits = pool_df[col["credit"]].sum() - used_by_secondary_credits
+    gpts["Overflow_pool"]["credits"] = pool_credits
     gpts["Overflow_pool"]["gpp"] = total_point
     log_str += "\n======== [Overflow Pool] ========\n"
     log_str += str(pool_df[use_cols].set_index(col["key"])) + "\n"
-    log_str += f"Total points: {total_point:.2f}\n"
+    if used_by_secondary_credits > 0:
+        log_str += f"<To secondary categories: {used_by_secondary_credits * (-1):+}>\n"
+    log_str += f"Total points: {total_point:.2f}  Total credits: {pool_credits}\n"
 
     return gpts, log_str
 
@@ -172,10 +176,12 @@ def calc_all(csv_encoding: str = "utf-8"):
         for k, v in gpts.items():
             print(f"{k}: {v['gpp']:.2f} Credits: {v['credits']}")
             gpt_score += v["gpp"]
-            total_credits += v["credits"]
+            if k != "Overflow_pool":
+                total_credits += v["credits"]
         extrapolate_gpt = extrapolate_by_gpa(toml, gpt_score, total_credits, 3.8)
         res_dict["gpp"] = gpt_score
         res_dict["total_credits"] = total_credits
         res_dict["extrapolate_gpp"] = extrapolate_gpt
+        res_dict["credits_in_pool"] = gpts["Overflow_pool"]["credits"]
         calc_res.append(res_dict)
     return calc_res

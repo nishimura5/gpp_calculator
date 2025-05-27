@@ -41,19 +41,28 @@ class App(ttk.Frame):
 
         self.tree = ttk.Treeview(
             tree_frame,
-            columns=("student_id", "student_name", "gpp", "total_credits", "extrapolate_gpp"),
+            columns=(
+                "student_id",
+                "student_name",
+                "gpp",
+                "total_credits",
+                "extrapolate_gpp",
+                "credits_in_pool",
+            ),
             show="headings",
         )
         self.tree.heading("student_id", text="Student ID")
         self.tree.heading("student_name", text="Student Name")
         self.tree.heading("gpp", text="Points")
-        self.tree.heading("total_credits", text="Total Credits")
+        self.tree.heading("total_credits", text="Credits")
         self.tree.heading("extrapolate_gpp", text="Extrapolate Points")
-        self.tree.column("student_id", width=150)
-        self.tree.column("student_name", width=150)
+        self.tree.heading("credits_in_pool", text="Credits in Pool")
+        self.tree.column("student_id", width=100)
+        self.tree.column("student_name", width=100)
         self.tree.column("gpp", width=100)
         self.tree.column("total_credits", width=100)
-        self.tree.column("extrapolate_gpp", width=150)
+        self.tree.column("extrapolate_gpp", width=100)
+        self.tree.column("credits_in_pool", width=100)
         self.tree.pack(
             padx=(10, 0), pady=(0, 10), fill=tk.BOTH, expand=True, side=tk.LEFT
         )
@@ -91,6 +100,7 @@ class App(ttk.Frame):
                     f"{res['gpp']:.1f}",
                     f"{res['total_credits']:.1f}",
                     f"{res['extrapolate_gpp']:.1f}",
+                    f"{res['credits_in_pool']:.1f}",
                 ),
             )
         self.res_table = calc_res
@@ -101,7 +111,7 @@ class App(ttk.Frame):
         self.export_btn["state"] = "disabled"
 
     def export(self):
-        export_csv(self.res_table, "gpp_results.csv")
+        export_csv(self.res_table, "results.csv")
 
     def open_settings(self):
         dlg_modal = tk.Toplevel(self)
@@ -152,7 +162,7 @@ def quit(root):
 def main():
     bg_color = "#e8e8e8"
     root = ttkthemes.ThemedTk(theme="breeze")
-    root.geometry("1400x700+50+50")
+    root.geometry("900x700+50+50")
     root.configure(background=bg_color)
     root.option_add("*background", bg_color)
     root.option_add("*Canvas.background", bg_color)
