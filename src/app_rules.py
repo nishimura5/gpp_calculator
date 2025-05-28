@@ -77,6 +77,14 @@ class App(ttk.Frame):
             row=0, column=3, sticky=tk.W
         )
 
+        ttk.Label(params_frame, text="Font in report:").grid(
+            row=0, column=4, sticky=tk.W, padx=(50, 10)
+        )
+        self.font_var = tk.StringVar()
+        ttk.Entry(params_frame, textvariable=self.font_var, width=12).grid(
+            row=0, column=5, sticky=tk.W
+        )
+
         ttk.Separator(main_frame, orient="horizontal").pack(fill=tk.X, pady=5)
         ttk.Label(main_frame, text="Columns name definition of lectures.csv").pack(
             anchor=tk.W
@@ -163,6 +171,8 @@ class App(ttk.Frame):
             self.csv_encoding_var.set(
                 self.toml_data["params"].get("csv_encoding", "utf-8")
             )
+            self.font_var.set(self.toml_data["params"].get("font_in_report", "Arial"))
+
         if "columns_in_lectures" in self.toml_data:
             self.key_col_entry.delete(0, tk.END)
             self.key_col_entry.insert(
@@ -343,17 +353,15 @@ class App(ttk.Frame):
         if "params" not in self.toml_data:
             self.toml_data["params"] = {}
 
-        try:
-            self.toml_data["params"]["extrapolate_target_credits"] = int(
-                self.target_credits_var.get()
-            )
-        except ValueError:
-            self.toml_data["params"]["extrapolate_target_credits"] = 120
+        self.toml_data["params"]["extrapolate_target_credits"] = (
+            self.target_credits_var.get() or "120"
+        )
 
-        # csv_encoding
         self.toml_data["params"]["csv_encoding"] = (
             self.csv_encoding_var.get() or "utf-8"
         )
+
+        self.toml_data["params"]["font_in_report"] = self.font_var.get() or "Arial"
 
         # columns_in_lectures
         if "columns_in_lectures" not in self.toml_data:

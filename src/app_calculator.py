@@ -1,13 +1,14 @@
 import os
 import sys
 import tkinter as tk
+import tomllib
 from tkinter import ttk
 
-import icon_data
 import ttkthemes
 
 import app_rules
 import calculator
+import icon_data
 from csv_export import export_csv
 
 IS_DARWIN = sys.platform.startswith("darwin")
@@ -17,6 +18,8 @@ class App(ttk.Frame):
     def __init__(self, master):
         super().__init__(master)
         master.title("GPP Calculator")
+
+        self.load_rules()
 
         head_frame = ttk.Frame(master)
         head_frame.pack(padx=10, pady=(15, 5), fill=tk.X)
@@ -84,9 +87,18 @@ class App(ttk.Frame):
 
         self.res_table = []
 
+    def load_rules(self):
+        root_path = os.path.dirname(os.path.abspath(__file__))
+        rules_toml_path = os.path.join(root_path, "rules.toml")
+        with open(rules_toml_path, "rb") as f:
+            toml = tomllib.load(f)
+        self.toml = toml
+
     def calculate(self):
         self.clear_tree()
-        calc_res = calculator.calc_all()
+        self.load_rules()
+
+        calc_res = calculator.calc_all(self.toml)
         if calc_res:
             self.export_btn["state"] = "normal"
         else:
@@ -131,11 +143,7 @@ class App(ttk.Frame):
         log_path = "log"
         log_file = os.path.join(current_dir, log_path, f"{student_id}.txt")
         try:
-            # 等角フォントを使用
-            if IS_DARWIN:
-                font = ("Menlo", 11)
-            else:
-                font = ("MS Gothic", 11)
+            font = (self.toml["params"]["font_in_report"], 11)
             with open(log_file, "r", encoding="utf-8") as f:
                 log_content = f.read()
             dlg_modal = tk.Toplevel(self)

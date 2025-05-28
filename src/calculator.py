@@ -1,5 +1,4 @@
 import os
-import tomllib
 
 import pandas as pd
 
@@ -92,7 +91,7 @@ def calc_gpt_score(toml, lectures_df, grade_df):
             f"Points: {total_point:.1f}  Credits: {total_credits}/{max_credits}\n"
         )
         if len(b_df) > 0:
-            log_str += "--- Overflow ---\n"
+            log_str += "-------- Overflow --------\n"
             log_str += str(b_df[use_cols].set_index(col["key"])) + "\n"
 
         gpts[k]["credits"] = total_credits
@@ -130,13 +129,10 @@ def extrapolate_by_gpa(toml, gpp, total_credits, gpa):
     return result
 
 
-def calc_all(csv_encoding: str = "utf-8"):
+def calc_all(toml, csv_encoding: str = "utf-8"):
     root_path = os.path.dirname(os.path.abspath(__file__))
     lecture_csv_path = os.path.join(root_path, "lectures.csv")
     student_csv_path = os.path.join(root_path, "students.csv")
-    rules_toml_path = os.path.join(root_path, "rules.toml")
-    with open(rules_toml_path, "rb") as f:
-        toml = tomllib.load(f)
 
     log_path = os.path.join(root_path, "log")
     os.makedirs(log_path, exist_ok=True)
