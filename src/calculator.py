@@ -88,7 +88,9 @@ def calc_gpt_score(toml, lectures_df, grade_df):
                 log_str += f"<From secondary categories: {got_credits:+}>\n"
                 used_by_secondary_credits += got_credits
 
-        log_str += f"Total points: {total_point:.2f}  Total credits: {total_credits}/{max_credits}\n"
+        log_str += (
+            f"Points: {total_point:.1f}  Credits: {total_credits}/{max_credits}\n"
+        )
         if len(b_df) > 0:
             log_str += "--- Overflow ---\n"
             log_str += str(b_df[use_cols].set_index(col["key"])) + "\n"
@@ -108,7 +110,8 @@ def calc_gpt_score(toml, lectures_df, grade_df):
     log_str += str(pool_df[use_cols].set_index(col["key"])) + "\n"
     if used_by_secondary_credits > 0:
         log_str += f"<To secondary categories: {used_by_secondary_credits * (-1):+}>\n"
-    log_str += f"Total points: {total_point:.2f}  Total credits: {pool_credits}\n"
+    log_str += f"Points: {total_point:.1f}  Credits: {pool_credits}\n"
+    log_str += f"\nTotal Points: {sum(v['gpp'] for v in gpts.values()):.1f}"
 
     return gpts, log_str
 

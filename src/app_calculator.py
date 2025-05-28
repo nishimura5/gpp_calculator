@@ -3,6 +3,7 @@ import sys
 import tkinter as tk
 from tkinter import ttk
 
+import icon_data
 import ttkthemes
 
 import app_rules
@@ -167,7 +168,7 @@ def main():
     root.option_add("*background", bg_color)
     root.option_add("*Canvas.background", bg_color)
     root.option_add("*Text.background", "#fcfcfc")
-    #    root.tk.call("wm", "iconphoto", root._w, tk.PhotoImage(data=icon_data.icon_data))
+    root.tk.call("wm", "iconphoto", root._w, tk.PhotoImage(data=icon_data.icon_data))
     s = ttk.Style(root)
     s.configure(".", background=bg_color)
     app = App(root)
