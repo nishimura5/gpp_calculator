@@ -86,6 +86,25 @@ class App(ttk.Frame):
         )
 
         ttk.Separator(main_frame, orient="horizontal").pack(fill=tk.X, pady=5)
+        ttk.Label(main_frame, text="Columns name definition of students.csv").pack(
+            anchor=tk.W
+        )
+
+        columns_frame = ttk.Frame(main_frame, padding=10)
+        columns_frame.pack(fill=tk.BOTH, expand=True)
+
+        ttk.Label(columns_frame, text="Key column").grid(
+            row=0, column=0, sticky=tk.W, padx=(0, 10), pady=5
+        )
+        self.student_key_col_entry = ttk.Entry(columns_frame, width=20)
+        self.student_key_col_entry.grid(row=0, column=1, pady=5)
+        ttk.Label(columns_frame, text="Student name column").grid(
+            row=0, column=2, sticky=tk.W, padx=(50, 10), pady=5
+        )
+        self.student_name_col_entry = ttk.Entry(columns_frame, width=20)
+        self.student_name_col_entry.grid(row=0, column=3, pady=5)
+
+        ttk.Separator(main_frame, orient="horizontal").pack(fill=tk.X, pady=5)
         ttk.Label(main_frame, text="Columns name definition of lectures.csv").pack(
             anchor=tk.W
         )
@@ -172,6 +191,16 @@ class App(ttk.Frame):
                 self.toml_data["params"].get("csv_encoding", "utf-8")
             )
             self.font_var.set(self.toml_data["params"].get("font_in_report", "Arial"))
+
+        if "columns_in_students" in self.toml_data:
+            self.student_key_col_entry.delete(0, tk.END)
+            self.student_key_col_entry.insert(
+                0, self.toml_data["columns_in_students"].get("key")
+            )
+            self.student_name_col_entry.delete(0, tk.END)
+            self.student_name_col_entry.insert(
+                0, self.toml_data["columns_in_students"].get("name")
+            )
 
         if "columns_in_lectures" in self.toml_data:
             self.key_col_entry.delete(0, tk.END)
@@ -362,6 +391,16 @@ class App(ttk.Frame):
         )
 
         self.toml_data["params"]["font_in_report"] = self.font_var.get() or "Arial"
+
+        # columns_in_students
+        if "columns_in_students" not in self.toml_data:
+            self.toml_data["columns_in_students"] = {}
+        self.toml_data["columns_in_students"]["key"] = (
+            self.student_key_col_entry.get() or "ID"
+        )
+        self.toml_data["columns_in_students"]["name"] = (
+            self.student_name_col_entry.get() or "Name"
+        )
 
         # columns_in_lectures
         if "columns_in_lectures" not in self.toml_data:

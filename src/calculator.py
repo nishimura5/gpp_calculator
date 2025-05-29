@@ -137,6 +137,9 @@ def calc_all(toml, csv_encoding: str = "utf-8"):
     log_path = os.path.join(root_path, "log")
     os.makedirs(log_path, exist_ok=True)
 
+    student_id_col_name = toml["columns_in_students"]["key"]
+    student_name = toml["columns_in_students"]["name"]
+
     lec = lectures.Lectures(
         toml,
         lecture_csv_path,
@@ -145,14 +148,14 @@ def calc_all(toml, csv_encoding: str = "utf-8"):
     lectures_df = lec.get_lectures()
 
     students_df = pd.read_csv(student_csv_path, encoding=csv_encoding)
-    students_list = students_df["学生番号"].unique().tolist()
+    students_list = students_df[student_id_col_name].unique().tolist()
 
     calc_res = []
     for student_id in students_list:
         res_dict = {
             "student_id": student_id,
-            "student_name": students_df[students_df["学生番号"] == student_id][
-                "氏名"
+            "student_name": students_df[students_df[student_id_col_name] == student_id][
+                student_name
             ].values[0],
             "gpp": 0,
             "total_credits": 0,
@@ -160,7 +163,7 @@ def calc_all(toml, csv_encoding: str = "utf-8"):
         }
         print(f"===== [{student_id}] =====")
         # load test data
-        grade_df = students_df[students_df["学生番号"] == student_id]
+        grade_df = students_df[students_df[student_id_col_name] == student_id]
 
         lecture_key_list = grade_df["講義コード"].unique().tolist()
         lec.check_undefined_lectures(lecture_key_list)
