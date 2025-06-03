@@ -96,13 +96,18 @@ class App(ttk.Frame):
         ttk.Label(columns_frame, text="Key column").grid(
             row=0, column=0, sticky=tk.W, padx=(0, 10), pady=5
         )
-        self.student_key_col_entry = ttk.Entry(columns_frame, width=20)
-        self.student_key_col_entry.grid(row=0, column=1, pady=5)
+        self.student_key_col_var = tk.StringVar()
+        ttk.Entry(columns_frame, textvariable=self.student_key_col_var, width=20).grid(
+            row=0, column=1, pady=5
+        )
+
         ttk.Label(columns_frame, text="Student name column").grid(
             row=0, column=2, sticky=tk.W, padx=(50, 10), pady=5
         )
-        self.student_name_col_entry = ttk.Entry(columns_frame, width=20)
-        self.student_name_col_entry.grid(row=0, column=3, pady=5)
+        self.student_name_col_var = tk.StringVar()
+        ttk.Entry(columns_frame, textvariable=self.student_name_col_var, width=20).grid(
+            row=0, column=3, pady=5
+        )
 
         ttk.Separator(main_frame, orient="horizontal").pack(fill=tk.X, pady=5)
         ttk.Label(main_frame, text="Columns name definition of lectures.csv").pack(
@@ -185,7 +190,7 @@ class App(ttk.Frame):
         # パラメータの更新
         if "params" in self.toml_data:
             self.target_credits_var.set(
-                str(self.toml_data["params"].get("extrapolate_target_credits", 120))
+                str(self.toml_data["params"].get("extrapolate_target_credits", "120"))
             )
             self.csv_encoding_var.set(
                 self.toml_data["params"].get("csv_encoding", "utf-8")
@@ -193,13 +198,11 @@ class App(ttk.Frame):
             self.font_var.set(self.toml_data["params"].get("font_in_report", "Arial"))
 
         if "columns_in_students" in self.toml_data:
-            self.student_key_col_entry.delete(0, tk.END)
-            self.student_key_col_entry.insert(
-                0, self.toml_data["columns_in_students"].get("key")
+            self.student_key_col_var.set(
+                self.toml_data["columns_in_students"].get("key", "Student ID")
             )
-            self.student_name_col_entry.delete(0, tk.END)
-            self.student_name_col_entry.insert(
-                0, self.toml_data["columns_in_students"].get("name")
+            self.student_name_col_var.set(
+                self.toml_data["columns_in_students"].get("name", "Student Name")
             )
 
         if "columns_in_lectures" in self.toml_data:
@@ -385,21 +388,20 @@ class App(ttk.Frame):
         self.toml_data["params"]["extrapolate_target_credits"] = (
             self.target_credits_var.get() or "120"
         )
-
         self.toml_data["params"]["csv_encoding"] = (
             self.csv_encoding_var.get() or "utf-8"
         )
-
         self.toml_data["params"]["font_in_report"] = self.font_var.get() or "Arial"
 
         # columns_in_students
         if "columns_in_students" not in self.toml_data:
             self.toml_data["columns_in_students"] = {}
+
         self.toml_data["columns_in_students"]["key"] = (
-            self.student_key_col_entry.get() or "ID"
+            self.student_key_col_var.get() or "Student ID"
         )
         self.toml_data["columns_in_students"]["name"] = (
-            self.student_name_col_entry.get() or "Name"
+            self.student_name_col_var.get() or "Student Name"
         )
 
         # columns_in_lectures
@@ -407,10 +409,10 @@ class App(ttk.Frame):
             self.toml_data["columns_in_lectures"] = {}
         self.toml_data["columns_in_lectures"]["key"] = self.key_col_entry.get()
         self.toml_data["columns_in_lectures"]["name"] = (
-            self.lecture_name_col_entry.get()
+            self.lecture_name_col_entry.get() or "Lecture Name"
         )
         self.toml_data["columns_in_lectures"]["category"] = (
-            self.category_col_entry.get()
+            self.category_col_entry.get() or "Category"
         )
         self.toml_data["columns_in_lectures"]["credit"] = self.credit_col_entry.get()
 

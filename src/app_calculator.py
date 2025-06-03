@@ -10,6 +10,7 @@ import app_rules
 import calculator
 import icon_data
 from csv_export import export_csv
+from rules_toml import Rules
 
 IS_DARWIN = sys.platform.startswith("darwin")
 
@@ -19,7 +20,8 @@ class App(ttk.Frame):
         super().__init__(master)
         master.title("GPP Calculator")
 
-        self.load_rules()
+        self.rules = Rules()
+        self.rules.load_rules()
 
         head_frame = ttk.Frame(master)
         head_frame.pack(padx=10, pady=(15, 5), fill=tk.X)
@@ -88,11 +90,7 @@ class App(ttk.Frame):
         self.res_table = []
 
     def load_rules(self):
-        root_path = os.path.dirname(os.path.abspath(__file__))
-        rules_toml_path = os.path.join(root_path, "rules.toml")
-        with open(rules_toml_path, "rb") as f:
-            toml = tomllib.load(f)
-        self.toml = toml
+        self.toml = self.rules.toml
 
     def calculate(self):
         self.clear_tree()
