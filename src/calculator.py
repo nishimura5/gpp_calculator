@@ -112,7 +112,11 @@ def calc_gpt_score(toml, lectures_df, grade_df):
     log_str += f"Points: {total_point:.1f}  Credits: {pool_credits}\n"
     log_str += f"\nTotal Points: {sum(v['gpp'] for v in gpts.values()):.1f}"
 
-    return gpts, log_str
+    # calculate GPA. Not use gpp
+    gpa = pl.calculate_gpa()
+    log_str += f" (GPA: {gpa:.2f})"
+
+    return gpts, gpa, log_str
 
 
 def extrapolate_by_gpa(toml, gpp, total_credits, gpa):
@@ -158,6 +162,7 @@ def calc_all(toml, csv_encoding: str = "utf-8"):
                 student_name
             ].values[0],
             "gpp": 0,
+            "gpa": 0,
             "total_credits": 0,
             "extrapolate_gpt": 0,
         }
@@ -168,7 +173,7 @@ def calc_all(toml, csv_encoding: str = "utf-8"):
         lecture_key_list = grade_df["講義コード"].unique().tolist()
         lec.check_undefined_lectures(lecture_key_list)
 
-        gpts, log_str = calc_gpt_score(toml, lectures_df, grade_df)
+        gpts, gpa, log_str = calc_gpt_score(toml, lectures_df, grade_df)
         with open(
             os.path.join(log_path, f"{student_id}.txt"), "w", encoding="utf-8"
         ) as f:
@@ -180,8 +185,9 @@ def calc_all(toml, csv_encoding: str = "utf-8"):
             gpt_score += v["gpp"]
             if k != "Overflow_pool":
                 total_credits += v["credits"]
-        extrapolate_gpt = extrapolate_by_gpa(toml, gpt_score, total_credits, 3.8)
+        extrapolate_gpt = extrapolate_by_gpa(toml, gpt_score, total_credits, gpa)
         res_dict["gpp"] = gpt_score
+        res_dict["gpa"] = gpa
         res_dict["total_credits"] = total_credits
         res_dict["extrapolate_gpp"] = extrapolate_gpt
         res_dict["credits_in_pool"] = gpts["Overflow_pool"]["credits"]

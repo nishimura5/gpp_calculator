@@ -51,6 +51,7 @@ class App(ttk.Frame):
                 "student_id",
                 "student_name",
                 "gpp",
+                "gpa",
                 "total_credits",
                 "extrapolate_gpp",
                 "credits_in_pool",
@@ -60,12 +61,14 @@ class App(ttk.Frame):
         self.tree.heading("student_id", text="Student ID")
         self.tree.heading("student_name", text="Student Name")
         self.tree.heading("gpp", text="Points")
+        self.tree.heading("gpa", text="GPA")
         self.tree.heading("total_credits", text="Credits")
         self.tree.heading("extrapolate_gpp", text="Extrapolate Points")
         self.tree.heading("credits_in_pool", text="Credits in Pool")
         self.tree.column("student_id", width=100)
         self.tree.column("student_name", width=100)
         self.tree.column("gpp", width=100)
+        self.tree.column("gpa", width=100)
         self.tree.column("total_credits", width=100)
         self.tree.column("extrapolate_gpp", width=100)
         self.tree.column("credits_in_pool", width=100)
@@ -109,8 +112,9 @@ class App(ttk.Frame):
                     res["student_id"],
                     res["student_name"],
                     f"{res['gpp']:.1f}",
+                    f"{res['gpa']:.2f}",
                     f"{res['total_credits']:.1f}",
-                    f"{res['extrapolate_gpp']:.1f}",
+                    f"{res['extrapolate_gpp']:.2f}",
                     f"{res['credits_in_pool']:.1f}",
                 ),
             )

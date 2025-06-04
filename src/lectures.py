@@ -1,3 +1,5 @@
+from decimal import ROUND_HALF_UP, Decimal, getcontext
+
 import pandas as pd
 
 pd.set_option("display.unicode.east_asian", True)
@@ -129,6 +131,31 @@ class PersonalLectures:
             by=["GP", self.credit_col_name], ascending=[False, True]
         )
         return dst_df
+
+    def calculate_gpa(self):
+        """
+        Calculate GPA based on the GP and credit columns.
+        :return: GPA value
+        """
+        if self.my_lectures_df.empty:
+            return 0.0
+
+        total_points = (
+            self.my_lectures_df["GP"] * self.my_lectures_df[self.credit_col_name]
+        ).sum()
+        total_credits = self.my_lectures_df[self.credit_col_name].sum()
+
+        if total_credits == 0:
+            return 0.0
+
+        decimal_total_points = Decimal(str(total_points))
+        decimal_total_credits = Decimal(str(total_credits))
+        # Calculate GPA
+        getcontext().prec = 3  # Set precision for Decimal calculations
+        gpa = float(decimal_total_points / decimal_total_credits)
+        rounded_gpa = Decimal(gpa).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+        return float(rounded_gpa)
 
     def check_undefined_lectures(self, categories: list[str]):
         """

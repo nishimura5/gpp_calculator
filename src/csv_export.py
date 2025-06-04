@@ -12,7 +12,7 @@ def export_csv(calc_res, file_path):
         toml = tomllib.load(f)
 
     with open(file_path, mode="w", newline="", encoding=toml["params"]["csv_encoding"]) as csvfile:
-        fieldnames = ["student_id", "student_name", "gpp", "total_credits", "extrapolate_gpp", "credits_in_pool"]
+        fieldnames = ["student_id", "student_name", "gpp", "gpa", "total_credits", "extrapolate_gpp", "credits_in_pool"]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
         writer.writeheader()
@@ -22,8 +22,9 @@ def export_csv(calc_res, file_path):
                     "student_id": res["student_id"],
                     "student_name": res["student_name"],
                     "gpp": f"{res['gpp']:.1f}",
+                    "gpa": f"{res['gpa']:.2f}",
                     "total_credits": f"{res['total_credits']:.1f}",
-                    "extrapolate_gpp": f"{res['extrapolate_gpp']:.1f}",
+                    "extrapolate_gpp": f"{res['extrapolate_gpp']:.2f}",
                     "credits_in_pool": f"{res['credits_in_pool']:.1f}",
                 }
             )
