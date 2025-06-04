@@ -121,8 +121,8 @@ def calc_gpt_score(toml, lectures_df, grade_df):
 
 def extrapolate_by_gpa(toml, gpp, total_credits, gpa):
     target_credits = toml["params"]["extrapolate_target_credits"]
-    if not isinstance(target_credits, (int, float)):
-        raise ValueError("total_gpp must be an integer or float")
+    if not isinstance(target_credits, (int, float, str)):
+        raise ValueError(f"total_gpp must be an integer or float: {target_credits}")
     else:
         target_credits = int(target_credits)
 
