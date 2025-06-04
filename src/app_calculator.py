@@ -19,6 +19,9 @@ class App(ttk.Frame):
         super().__init__(master)
         master.title("GPP Calculator")
 
+        self.rules = Rules()
+        self.rules.load_rules()
+
         head_frame = ttk.Frame(master)
         head_frame.pack(padx=10, pady=(15, 5), fill=tk.X)
         calc_btn = ttk.Button(
@@ -95,8 +98,6 @@ class App(ttk.Frame):
                 self.tree.item(self.tree.selection())["values"][0]
             ),
         )
-
-        self.rules = Rules()
 
         self.res_table = []
 
