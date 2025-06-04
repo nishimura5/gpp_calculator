@@ -1,7 +1,6 @@
 import os
 import sys
 import tkinter as tk
-import tomllib
 from tkinter import ttk
 
 import ttkthemes
@@ -20,9 +19,6 @@ class App(ttk.Frame):
         super().__init__(master)
         master.title("GPP Calculator")
 
-        self.rules = Rules()
-        self.rules.load_rules()
-
         head_frame = ttk.Frame(master)
         head_frame.pack(padx=10, pady=(15, 5), fill=tk.X)
         calc_btn = ttk.Button(
@@ -40,6 +36,16 @@ class App(ttk.Frame):
             head_frame, text="Settings", command=self.open_settings
         )
         setting_btn.pack(padx=5, side=tk.RIGHT)
+
+        # Error message label
+        self.error_var = tk.StringVar()
+        self.error_label = ttk.Label(
+            head_frame,
+            textvariable=self.error_var,
+            foreground="red",
+        )
+        self.error_label.pack(padx=5, pady=(5, 0))
+        self.error_var.set("")
 
         # Treeview Frame with Scrollbar
         tree_frame = ttk.Frame(master)
@@ -90,14 +96,39 @@ class App(ttk.Frame):
             ),
         )
 
+        self.rules = Rules()
+
         self.res_table = []
 
     def load_rules(self):
         self.toml = self.rules.toml
 
+    def check_csv_exist(self):
+        root_path = os.path.dirname(os.path.abspath(__file__))
+        lecture_csv_path = os.path.join(root_path, "lectures.csv")
+        student_csv_path = os.path.join(root_path, "students.csv")
+
+        err_msg_list = []
+        if not os.path.exists(lecture_csv_path):
+            err_msg_list.append("lectures.csv not found.")
+        if not os.path.exists(student_csv_path):
+            err_msg_list.append("students.csv not found.")
+        if err_msg_list:
+            err_msg = "  ".join(f"({i + 1}){msg}" for i, msg in enumerate(err_msg_list))
+            self.error_var.set(err_msg)
+            self.export_btn["state"] = "disabled"
+            return False
+        else:
+            self.error_var.set("")
+            self.export_btn["state"] = "normal"
+        return True
+
     def calculate(self):
         self.clear_tree()
         self.load_rules()
+        ok = self.check_csv_exist()
+        if not ok:
+            return
 
         calc_res = calculator.calc_all(self.toml)
         if calc_res:
