@@ -178,3 +178,6 @@ cython_debug/
 # files
 *.csv
 *.toml
+
+# macOS
+.DS_Store
