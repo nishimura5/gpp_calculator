@@ -1,0 +1,11 @@
+[project]
+name = "gpp_calculator"
+version = "0.1.0"
+description = "Grade point pool calculator"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pandas>=2.2.3",
+    "toml>=0.10.2",
+    "ttkthemes>=3.2.2",
+]
