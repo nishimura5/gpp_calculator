@@ -1,12 +1,11 @@
 import os
 import sys
 import tkinter as tk
-import tomllib
 from tkinter import messagebox, ttk
 
-import toml
 import ttkthemes
 
+import rules_toml
 from lectures import Lectures
 
 IS_DARWIN = sys.platform.startswith("darwin")
@@ -21,12 +20,12 @@ class App(ttk.Frame):
 
         # TOMLファイルのパス
         self.toml_file = os.path.join(os.path.dirname(__file__), "rules.toml")
-        self.toml_data = {}
+        self.toml_data = rules_toml.Rules()
+        self.toml_data.load_rules()
 
         # GUI要素を初期化
         self.create_widgets()
 
-        # TOMLファイルを読み込み
         self.load_toml()
 
     def create_widgets(self):
@@ -93,7 +92,6 @@ class App(ttk.Frame):
             variable=self.year_filter_var,
         ).grid(row=0, column=6, sticky=tk.W, padx=(50, 10))
 
-
         ttk.Separator(main_frame, orient="horizontal").pack(fill=tk.X, pady=5)
         ttk.Label(main_frame, text="Columns name definition of students.csv").pack(
             anchor=tk.W
@@ -122,9 +120,9 @@ class App(ttk.Frame):
             row=1, column=0, sticky=tk.W, padx=(0, 10), pady=5
         )
         self.student_grade_col_var = tk.StringVar()
-        ttk.Entry(columns_frame, textvariable=self.student_grade_col_var, width=20).grid(
-            row=1, column=1, pady=5
-        )
+        ttk.Entry(
+            columns_frame, textvariable=self.student_grade_col_var, width=20
+        ).grid(row=1, column=1, pady=5)
 
         ttk.Separator(main_frame, orient="horizontal").pack(fill=tk.X, pady=5)
         ttk.Label(main_frame, text="Columns name definition of lectures.csv").pack(
@@ -138,26 +136,33 @@ class App(ttk.Frame):
         ttk.Label(columns_frame, text="Key column").grid(
             row=0, column=0, sticky=tk.W, padx=(0, 10), pady=5
         )
-        self.key_col_entry = ttk.Entry(columns_frame, width=20)
-        self.key_col_entry.grid(row=0, column=1, pady=5)
+        self.lecture_key_col_var = tk.StringVar()
+        self.key_col_entry = ttk.Entry(
+            columns_frame, textvariable=self.lecture_key_col_var, width=20
+        ).grid(row=0, column=1, pady=5)
 
         ttk.Label(columns_frame, text="Lecture name column").grid(
             row=0, column=2, sticky=tk.W, padx=(50, 10), pady=5
         )
-        self.lecture_name_col_entry = ttk.Entry(columns_frame, width=20)
-        self.lecture_name_col_entry.grid(row=0, column=3, pady=5)
-
+        self.lecture_name_col_var = tk.StringVar()
+        self.lecture_name_col_entry = ttk.Entry(
+            columns_frame, textvariable=self.lecture_name_col_var, width=20
+        ).grid(row=0, column=3, pady=5)
         ttk.Label(columns_frame, text="Category column").grid(
             row=1, column=0, sticky=tk.W, padx=(0, 10), pady=5
         )
-        self.category_col_entry = ttk.Entry(columns_frame, width=20)
-        self.category_col_entry.grid(row=1, column=1, pady=5)
+        self.lecture_category_col_var = tk.StringVar()
+        self.category_col_entry = ttk.Entry(
+            columns_frame, textvariable=self.lecture_category_col_var, width=20
+        ).grid(row=1, column=1, pady=5)
 
         ttk.Label(columns_frame, text="Credit column").grid(
             row=1, column=2, sticky=tk.W, padx=(50, 10), pady=5
         )
-        self.credit_col_entry = ttk.Entry(columns_frame, width=20)
-        self.credit_col_entry.grid(row=1, column=3, pady=5)
+        self.lecture_credit_col_var = tk.StringVar()
+        self.credit_col_entry = ttk.Entry(
+            columns_frame, textvariable=self.lecture_credit_col_var, width=20
+        ).grid(row=1, column=3, pady=5)
 
         # category section
         ttk.Separator(main_frame, orient="horizontal").pack(fill=tk.X, pady=5)
@@ -192,69 +197,40 @@ class App(ttk.Frame):
 
     def load_toml(self):
         """TOMLファイルを読み込む"""
-        try:
-            if os.path.exists(self.toml_file):
-                with open(self.toml_file, "rb") as f:
-                    self.toml_data = tomllib.load(f)
-                self.update_gui()
-            else:
-                messagebox.showwarning("警告", f"{self.toml_file}が見つかりません")
-        except Exception as e:
-            messagebox.showerror("エラー", f"TOMLファイルの読み込みに失敗しました: {e}")
+        self.toml_data.load_rules()
+        self.update_gui()
 
     def update_gui(self):
         """GUIを更新"""
         # パラメータの更新
-        if "params" in self.toml_data:
-            self.target_credits_var.set(
-                str(self.toml_data["params"].get("extrapolate_target_credits", "120"))
-            )
-            self.csv_encoding_var.set(
-                self.toml_data["params"].get("csv_encoding", "utf-8")
-            )
-            self.font_var.set(self.toml_data["params"].get("font_in_report", "Arial"))
-            self.year_filter_var.set(
-                self.toml_data["params"].get("year_filter", False)
-            )
+        self.target_credits_var.set(self.toml_data.get_extrapolate_target_credits())
+        self.csv_encoding_var.set(self.toml_data.get_csv_encoding())
+        self.font_var.set(self.toml_data.get_font_in_report())
+        self.year_filter_var.set(self.toml_data.get_year_filter())
 
-        if "columns_in_students" in self.toml_data:
-            self.student_key_col_var.set(
-                self.toml_data["columns_in_students"].get("key", "Student ID")
-            )
-            self.student_name_col_var.set(
-                self.toml_data["columns_in_students"].get("name", "Student Name")
-            )
-            self.student_grade_col_var.set(
-                self.toml_data["columns_in_students"].get("grade", "Grade")
-            )
+        student_rules = self.toml_data.get_student_rules()
+        self.student_key_col_var.set(student_rules.get("key_column"))
+        self.student_name_col_var.set(student_rules.get("name_column"))
+        self.student_grade_col_var.set(student_rules.get("grade_column"))
 
-        if "columns_in_lectures" in self.toml_data:
-            self.key_col_entry.delete(0, tk.END)
-            self.key_col_entry.insert(
-                0, self.toml_data["columns_in_lectures"].get("key")
-            )
-            self.lecture_name_col_entry.delete(0, tk.END)
-            self.lecture_name_col_entry.insert(
-                0, self.toml_data["columns_in_lectures"].get("name")
-            )
-            self.category_col_entry.delete(0, tk.END)
-            self.category_col_entry.insert(
-                0, self.toml_data["columns_in_lectures"].get("category")
-            )
-            self.credit_col_entry.delete(0, tk.END)
-            self.credit_col_entry.insert(
-                0, self.toml_data["columns_in_lectures"].get("credit")
-            )
+        lecture_rules = self.toml_data.get_lecture_rules()
+        self.lecture_key_col_var.set(lecture_rules.get("key_column", "Lecture ID"))
+        self.lecture_name_col_var.set(lecture_rules.get("name_column", "Lecture Name"))
+        self.lecture_category_col_var.set(
+            lecture_rules.get("category_column", "Category")
+        )
+        self.lecture_credit_col_var.set(lecture_rules.get("credit_column", "Credit"))
 
         # 既存のカテゴリウィジェットをクリア
         for widget in self.scrollable_frame.winfo_children():
             widget.destroy()
         self.category_vars.clear()
-        if "categories" in self.toml_data:
+        categories_dict = self.toml_data.get_categories()
+        if categories_dict:
             col = 0
             row = 0
             idx = 0
-            for category_name, category_data in self.toml_data["categories"].items():
+            for category_name, category_data in categories_dict.items():
                 self.create_category_widgets(
                     category_name, category_data, row, col, idx
                 )
@@ -268,13 +244,12 @@ class App(ttk.Frame):
         for widget in self.secondary_category_frame.winfo_children():
             widget.destroy()
         self.secondary_category_vars.clear()
-        if "secondary_categories" in self.toml_data:
+        secondary_categories_dict = self.toml_data.get_secondaty_categories()
+        if secondary_categories_dict:
             col = 0
             row = 0
             idx = 0
-            for category_name, category_data in self.toml_data[
-                "secondary_categories"
-            ].items():
+            for category_name, category_data in secondary_categories_dict.items():
                 self.create_secondary_category_widgets(
                     category_name, category_data, row, col, idx
                 )
@@ -391,13 +366,8 @@ class App(ttk.Frame):
     def save_file(self):
         """ファイルを保存"""
         try:
-            # データを更新
             self.update_toml_data()
-
-            # ファイルに保存
-            with open(self.toml_file, "w", encoding="utf-8") as f:
-                toml.dump(self.toml_data, f)
-
+            self.toml_data.save_rules()
             messagebox.showinfo("成功", "ファイルが保存されました")
         except Exception as e:
             messagebox.showerror("エラー", f"保存に失敗しました: {e}")
@@ -405,47 +375,37 @@ class App(ttk.Frame):
     def update_toml_data(self):
         """GUIからデータを更新"""
         # パラメータを更新
-        if "params" not in self.toml_data:
-            self.toml_data["params"] = {}
+        toml_data = {}
+        if "params" not in toml_data:
+            toml_data["params"] = {}
 
-        self.toml_data["params"]["extrapolate_target_credits"] = (
+        toml_data["params"]["extrapolate_target_credits"] = (
             self.target_credits_var.get() or "120"
         )
-        self.toml_data["params"]["csv_encoding"] = (
-            self.csv_encoding_var.get() or "utf-8"
-        )
-        self.toml_data["params"]["font_in_report"] = self.font_var.get() or "Arial"
-        self.toml_data["params"]["year_filter"] = self.year_filter_var.get()
-        
-        # columns_in_students
-        if "columns_in_students" not in self.toml_data:
-            self.toml_data["columns_in_students"] = {}
+        toml_data["params"]["csv_encoding"] = self.csv_encoding_var.get() or "utf-8"
+        toml_data["params"]["font_in_report"] = self.font_var.get() or "Arial"
+        toml_data["params"]["year_filter"] = self.year_filter_var.get()
 
-        self.toml_data["columns_in_students"]["key"] = (
-            self.student_key_col_var.get() or "Student ID"
-        )
-        self.toml_data["columns_in_students"]["name"] = (
-            self.student_name_col_var.get() or "Student Name"
-        )
-        self.toml_data["columns_in_students"]["grade"] = (
-            self.student_grade_col_var.get() or "Grade"
-        )
+        # columns_in_students
+        if "columns_in_students" not in toml_data:
+            toml_data["columns_in_students"] = {}
+        toml_data["columns_in_students"]["key"] = self.student_key_col_var.get()
+        toml_data["columns_in_students"]["name"] = self.student_name_col_var.get()
+        toml_data["columns_in_students"]["grade"] = self.student_grade_col_var.get()
 
         # columns_in_lectures
-        if "columns_in_lectures" not in self.toml_data:
-            self.toml_data["columns_in_lectures"] = {}
-        self.toml_data["columns_in_lectures"]["key"] = self.key_col_entry.get()
-        self.toml_data["columns_in_lectures"]["name"] = (
-            self.lecture_name_col_entry.get() or "Lecture Name"
+        if "columns_in_lectures" not in toml_data:
+            toml_data["columns_in_lectures"] = {}
+        toml_data["columns_in_lectures"]["key"] = self.lecture_key_col_var.get()
+        toml_data["columns_in_lectures"]["name"] = self.lecture_name_col_var.get()
+        toml_data["columns_in_lectures"]["category"] = (
+            self.lecture_category_col_var.get()
         )
-        self.toml_data["columns_in_lectures"]["category"] = (
-            self.category_col_entry.get() or "Category"
-        )
-        self.toml_data["columns_in_lectures"]["credit"] = self.credit_col_entry.get()
+        toml_data["columns_in_lectures"]["credit"] = self.lecture_credit_col_var.get()
 
         # カテゴリを更新
-        if "categories" not in self.toml_data:
-            self.toml_data["categories"] = {}
+        if "categories" not in toml_data:
+            toml_data["categories"] = {}
 
         for category_name, vars_dict in self.category_vars.items():
             category_data = {}
@@ -474,10 +434,10 @@ class App(ttk.Frame):
             else:
                 category_data["my_courses"] = []
 
-            self.toml_data["categories"][category_name] = category_data
+            toml_data["categories"][category_name] = category_data
         # セカンダリカテゴリを更新
-        if "secondary_categories" not in self.toml_data:
-            self.toml_data["secondary_categories"] = {}
+        if "secondary_categories" not in toml_data:
+            toml_data["secondary_categories"] = {}
         for category_name, vars_dict in self.secondary_category_vars.items():
             category_data = {}
 
@@ -496,18 +456,20 @@ class App(ttk.Frame):
             else:
                 category_data["category"] = []
 
-            self.toml_data["secondary_categories"][category_name] = category_data
+            toml_data["secondary_categories"][category_name] = category_data
+        self.toml_data.set_toml(toml_data)
 
     def get_category_names(self):
-        if "columns_in_lectures" in self.toml_data:
+        toml_data = self.toml_data.get_toml()
+        if "columns_in_lectures" in toml_data:
             root_path = os.path.dirname(os.path.abspath(__file__))
             lecture_csv_path = os.path.join(root_path, "lectures.csv")
             lec = Lectures(
-                self.toml_data,
+                toml_data,
                 lecture_csv_path,
             )
             categories = lec.get_category_names(
-                self.toml_data["columns_in_lectures"]["category"]
+                toml_data["columns_in_lectures"]["category"]
             )
             # remove np.nan or empty categories
             categories = [str(cat) for cat in categories if cat and str(cat) != "nan"]
