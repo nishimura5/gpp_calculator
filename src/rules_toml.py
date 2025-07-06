@@ -14,7 +14,8 @@ class Rules:
         with open(self.rules_toml_path, "rb") as f:
             toml = tomllib.load(f)
         self.toml = toml
-        self._check_font_exist(toml["params"]["font_in_report"])
+        if "params" in toml and "font_in_report" in toml.get("params", {}):
+            self._check_font_exist(toml["params"]["font_in_report"])
 
     def _check_font_exist(self, font_name):
         from tkinter import font
@@ -22,8 +23,10 @@ class Rules:
         available_fonts = font.families()
         if font_name not in available_fonts:
             print(f"Font '{font_name}' is not available on this system.")
+            print(available_fonts)
 
     def _generate_rules(self):
         with open(self.rules_toml_path, "w") as f:
             f.write("[params]\n")
             f.write("[columns_in_students]\n")
+            f.write("[columns_in_lectures]\n")
