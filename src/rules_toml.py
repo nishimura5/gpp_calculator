@@ -28,8 +28,13 @@ class Rules:
     def set_toml(self, toml):
         self.toml = toml
 
+    def get_toml(self):
+        if self.toml is None:
+            raise ValueError("TOML data is not set. Please load or set TOML data first.")
+        return self.toml
+
     def save_rules(self):
-        if not self.toml:
+        if self.toml is None:
             raise ValueError("TOML data is not set.")
         with open(self.rules_toml_path, "w") as f:
             f.write(toml.dumps(self.toml))
