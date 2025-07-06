@@ -207,9 +207,9 @@ marimo/_lsp/
 __marimo__/
 
 # files
-.csv
-.xlsx
-.toml
+*.csv
+*.xlsx
+*.toml
 
 # mac
-.DS_Store
+*.DS_Store
