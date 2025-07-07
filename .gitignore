@@ -210,6 +210,7 @@ __marimo__/
 *.csv
 *.xlsx
 *.toml
+src/log/
 
 # mac
 *.DS_Store
