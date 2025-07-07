@@ -50,6 +50,12 @@ class App(ttk.Frame):
         self.error_label.pack(padx=5, pady=(5, 0))
         self.error_var.set("")
 
+        # Progress bar
+        progress_frame = ttk.Frame(master)
+        progress_frame.pack(fill=tk.X, padx=20, pady=(0, 3))
+        self.progress_bar = ttk.Progressbar(progress_frame)
+        self.progress_bar.pack(fill=tk.X)
+
         # Treeview Frame with Scrollbar
         tree_frame = ttk.Frame(master)
         tree_frame.pack(padx=10, pady=(0, 10), fill=tk.BOTH, expand=True)
@@ -132,25 +138,36 @@ class App(ttk.Frame):
         if not ok:
             return
 
-        calc_res = calculator.calc_all(self.toml, csv_encoding=self.toml["params"]["csv_encoding"])
+        self.progress_bar.pack(fill=tk.X)
+        calc_res = calculator.calc_all(
+            self.toml,
+            csv_encoding=self.toml["params"]["csv_encoding"],
+            progress_bar=self.progress_bar,
+            master=self.master,
+        )
+
         if calc_res:
             self.export_btn["state"] = "normal"
+
+            for res in calc_res:
+                self.tree.insert(
+                    "",
+                    tk.END,
+                    values=(
+                        res["student_id"],
+                        res["student_name"],
+                        f"{res['gpp']:.1f}",
+                        f"{res['gpa']:.2f}",
+                        f"{res['total_credits']:.1f}",
+                        f"{res['extrapolate_gpp']:.2f}",
+                        f"{res['credits_in_pool']:.1f}",
+                    ),
+                )
+
+            # Hide progress bar
+            self.progress_bar.pack_forget()
         else:
             self.export_btn["state"] = "disabled"
-        for res in calc_res:
-            self.tree.insert(
-                "",
-                tk.END,
-                values=(
-                    res["student_id"],
-                    res["student_name"],
-                    f"{res['gpp']:.1f}",
-                    f"{res['gpa']:.2f}",
-                    f"{res['total_credits']:.1f}",
-                    f"{res['extrapolate_gpp']:.2f}",
-                    f"{res['credits_in_pool']:.1f}",
-                ),
-            )
         self.res_table = calc_res
 
     def clear_tree(self):

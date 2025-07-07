@@ -147,8 +147,7 @@ def extrapolate_by_gpa(toml, gpp, total_credits, gpa):
         result = gpp + gpa * (target_credits - total_credits)
     return result
 
-
-def calc_all(toml, csv_encoding: str = "utf-8"):
+def calc_all(toml, csv_encoding: str = "utf-8", progress_bar=None, master=None):
     root_path = os.path.dirname(os.path.abspath(__file__))
     lecture_csv_path = os.path.join(root_path, "lectures.csv")
     student_csv_path = os.path.join(root_path, "students.csv")
@@ -187,7 +186,14 @@ def calc_all(toml, csv_encoding: str = "utf-8"):
         students_df = students_df[students_df["year"].astype("Int64") <= 20243]
 
     calc_res = []
+    if progress_bar is not None and master is not None:
+        total_students = len(students_list)
+        progress_bar.configure(maximum=total_students)
     for student_id in students_list:
+        if progress_bar is not None and master is not None:
+            progress_bar.configure(value=students_list.index(student_id) + 1)
+            master.update_idletasks()  # Update UI
+
         grade_df = students_df[students_df[student_id_col_name] == student_id]
         if grade_df.empty:
             print(f"Warning: No grades found for student {student_id}. Skipping.")
