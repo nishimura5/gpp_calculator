@@ -7,20 +7,16 @@ pd.set_option("display.unicode.ambiguous_as_wide", True)
 
 
 class Lectures:
-    def __init__(self, toml, csv_path):
+    def __init__(self, toml, lectures_df):
         """
-        Read CSV and separate basic tables based on key_col_name in the constructor.
+        Separate basic tables based on key_col_name in the constructor.
         self.all_lectures_df: All lecture information
         :param toml: Dictionary containing column definitions and other settings
-        :param csv_path: Path to the CSV file
-        :param encoding: Encoding of the CSV file
+        :param lectures_df: DataFrame containing lecture information
         """
-
         self.key_col_name = toml["columns_in_lectures"]["key"]
         self.category_col_name = toml["columns_in_lectures"]["category"]
-        self.all_lectures_df = pd.read_csv(
-            csv_path, encoding=toml["params"]["csv_encoding"], dtype=str, header=0
-        )
+        self.all_lectures_df = lectures_df.copy()
 
         # duplicate check
         duplicate_lectures = self.all_lectures_df[
@@ -105,9 +101,9 @@ class PersonalLectures:
     def set_grades(self, grades_df: pd.DataFrame):
         # convert SABC grades to GP
         grades_df = grades_df.copy()
-        grades_df = grades_df[grades_df[self.grade_col_name].isin(["Ｓ", "Ａ", "Ｂ", "Ｃ", "Ｆ", "S", "A", "B", "C", "F", "s", "a", "b", "c", "f"])]
+        grades_df = grades_df[grades_df[self.grade_col_name].isin(["Ｓ", "Ａ", "Ｂ", "Ｃ", "Ｆ", "S", "A", "B", "C", "F", "s", "a", "b", "c", "f", "4", "3", "2", "1", "0"])]
         grades_df["GP"] = grades_df[self.grade_col_name].map(
-            {"Ｓ": 4.0, "Ａ": 3.0, "Ｂ": 2.0, "Ｃ": 1.0, "Ｆ": 0.0, "S": 4.0, "A": 3.0, "B": 2.0, "C": 1.0, "F": 0.0, "s": 4.0, "a": 3.0, "b": 2.0, "c": 1.0, "f": 0.0}
+            {"Ｓ": 4.0, "Ａ": 3.0, "Ｂ": 2.0, "Ｃ": 1.0, "Ｆ": 0.0, "S": 4.0, "A": 3.0, "B": 2.0, "C": 1.0, "F": 0.0, "s": 4.0, "a": 3.0, "b": 2.0, "c": 1.0, "f": 0.0, "4": 4.0, "3": 3.0, "2": 2.0, "1": 1.0, "0": 0.0}
         )
         self.grades_df = grades_df
 

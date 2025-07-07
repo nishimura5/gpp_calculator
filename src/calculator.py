@@ -6,6 +6,7 @@ import lectures
 from credit_pool import CreditPool
 from input_formatting import preprocess
 
+
 def calc_gpt_score(toml, lectures_df, grade_df):
     t_categories = toml["categories"]
     secondary_categories = toml["secondary_categories"]
@@ -147,13 +148,11 @@ def extrapolate_by_gpa(toml, gpp, total_credits, gpa):
         result = gpp + gpa * (target_credits - total_credits)
     return result
 
+
 def calc_all(toml, csv_encoding: str = "utf-8", progress_bar=None, master=None):
     root_path = os.path.dirname(os.path.abspath(__file__))
     lecture_csv_path = os.path.join(root_path, "lectures.csv")
     student_csv_path = os.path.join(root_path, "students.csv")
-
-    preprocess.update_lectures_csv(lecture_csv_path, toml)
-    preprocess.update_students_csv(student_csv_path, toml)
 
     log_path = os.path.join(root_path, "log")
     os.makedirs(log_path, exist_ok=True)
@@ -162,29 +161,17 @@ def calc_all(toml, csv_encoding: str = "utf-8", progress_bar=None, master=None):
     student_id_col_name = toml["columns_in_students"]["key"]
     student_name = toml["columns_in_students"]["name"]
 
+    lectures_df = preprocess.read_lectures_csv(
+        lecture_csv_path, toml["params"]["csv_encoding"]
+    )
     lec = lectures.Lectures(
         toml,
-        lecture_csv_path,
+        lectures_df,
     )
-
     lectures_df = lec.get_lectures()
 
-    students_df = pd.read_csv(student_csv_path, encoding=csv_encoding)
+    students_df = preprocess.read_students_csv(student_csv_path, encoding=csv_encoding)
     students_list = students_df[student_id_col_name].unique().tolist()
-
-    if toml["params"].get("year_filter", False):
-        season_map_dict = {
-            "1": ["春学期"],
-            "2": ["夏学期", "前期", "前期集中"],
-            "3": ["秋学期"],
-            "4": ["冬学期", "後期", "後期集中", "通期集中"],
-        }
-        season_sr = students_df["履修学期"].map(
-            {v: k for k, vs in season_map_dict.items() for v in vs}
-        )
-        # nanを想定した整数型に変換
-        students_df["year"] = students_df["履修年度"].astype(str) + season_sr
-        students_df = students_df[students_df["year"].astype("Int64") <= 20243]
 
     calc_res = []
     if progress_bar is not None and master is not None:

@@ -84,14 +84,6 @@ class App(ttk.Frame):
             row=0, column=5, sticky=tk.W
         )
 
-        # Year filter checkbox
-        self.year_filter_var = tk.BooleanVar()
-        ttk.Checkbutton(
-            params_frame,
-            text="Use year filter",
-            variable=self.year_filter_var,
-        ).grid(row=0, column=6, sticky=tk.W, padx=(50, 10))
-
         ttk.Separator(main_frame, orient="horizontal").pack(fill=tk.X, pady=5)
         ttk.Label(main_frame, text="Columns name definition of students.csv").pack(
             anchor=tk.W
@@ -205,7 +197,6 @@ class App(ttk.Frame):
         self.target_credits_var.set(self.toml_data.get_extrapolate_target_credits())
         self.csv_encoding_var.set(self.toml_data.get_csv_encoding())
         self.font_var.set(self.toml_data.get_font_in_report())
-        self.year_filter_var.set(self.toml_data.get_year_filter())
 
         # Student columns
         student_rules = self.toml_data.get_student_rules()
@@ -373,7 +364,6 @@ class App(ttk.Frame):
         )
         toml_data["params"]["csv_encoding"] = self.csv_encoding_var.get() or "utf-8"
         toml_data["params"]["font_in_report"] = self.font_var.get() or "Arial"
-        toml_data["params"]["year_filter"] = self.year_filter_var.get()
 
         # Student columns
         if "columns_in_students" not in toml_data:

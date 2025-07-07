@@ -50,9 +50,6 @@ class Rules:
     def get_csv_encoding(self):
         return self.toml["params"].get("csv_encoding", "utf-8")
 
-    def get_year_filter(self):
-        return self.toml["params"].get("year_filter", False)
-
     def get_student_rules(self):
         res = {
             "key_column": self.toml["columns_in_students"].get("key", "Student ID"),
