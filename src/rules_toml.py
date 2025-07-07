@@ -30,13 +30,15 @@ class Rules:
 
     def get_toml(self):
         if self.toml is None:
-            raise ValueError("TOML data is not set. Please load or set TOML data first.")
+            raise ValueError(
+                "TOML data is not set. Please load or set TOML data first."
+            )
         return self.toml
 
     def save_rules(self):
         if self.toml is None:
             raise ValueError("TOML data is not set.")
-        with open(self.rules_toml_path, "w") as f:
+        with open(self.rules_toml_path, "w", encoding="utf-8") as f:
             f.write(toml.dumps(self.toml))
 
     def get_extrapolate_target_credits(self):
