@@ -4,7 +4,7 @@ import pandas as pd
 
 import lectures
 from credit_pool import CreditPool
-
+from input_formatting import preprocess
 
 def calc_gpt_score(toml, lectures_df, grade_df):
     t_categories = toml["categories"]
@@ -152,6 +152,9 @@ def calc_all(toml, csv_encoding: str = "utf-8", progress_bar=None, master=None):
     lecture_csv_path = os.path.join(root_path, "lectures.csv")
     student_csv_path = os.path.join(root_path, "students.csv")
 
+    preprocess.update_lectures_csv(lecture_csv_path, toml)
+    preprocess.update_students_csv(student_csv_path, toml)
+
     log_path = os.path.join(root_path, "log")
     os.makedirs(log_path, exist_ok=True)
 
@@ -168,8 +171,6 @@ def calc_all(toml, csv_encoding: str = "utf-8", progress_bar=None, master=None):
 
     students_df = pd.read_csv(student_csv_path, encoding=csv_encoding)
     students_list = students_df[student_id_col_name].unique().tolist()
-
-    students_df = students_df[students_df["上書き再履修"] != 1]
 
     if toml["params"].get("year_filter", False):
         season_map_dict = {
