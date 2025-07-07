@@ -208,6 +208,7 @@ __marimo__/
 
 # files
 *.csv
+*.csv.bak
 *.xlsx
 *.toml
 src/log/
