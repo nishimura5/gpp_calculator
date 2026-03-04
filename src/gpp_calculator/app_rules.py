@@ -168,8 +168,22 @@ class App(ttk.Frame):
         faculty_frame = ttk.Frame(main_frame, padding=10)
         faculty_frame.pack(fill=tk.BOTH, expand=True)
         ttk.Button(
-            faculty_frame, text="Get category names", command=self.get_category_names
-        ).grid(row=1, column=1, sticky=tk.EW, padx=(0, 0), pady=(5, 0))
+            faculty_frame,
+            text="Check category names",
+            command=self.check_category_names,
+        ).grid(row=0, column=0, sticky=tk.EW, padx=(0, 0))
+
+        ttk.Button(
+            faculty_frame,
+            text="Category names in lectures.csv",
+            command=self.show_category_names,
+        ).grid(row=0, column=1, sticky=tk.EW, padx=(20, 0))
+
+        ttk.Button(
+            faculty_frame,
+            text="Category names in rules.toml",
+            command=self.show_category_names_from_toml,
+        ).grid(row=0, column=2, sticky=tk.EW, padx=(5, 0))
 
         categories_frame = ttk.Frame(main_frame, padding=10)
         categories_frame.pack(fill=tk.BOTH, expand=True)
@@ -459,14 +473,45 @@ class App(ttk.Frame):
             )
             # Remove empty and NaN categories
             categories = [str(cat) for cat in categories if cat and str(cat) != "nan"]
+            categories = sorted(categories)
+            return categories
+        else:
+            messagebox.showerror(
+                "Error", "Category column name is not defined in rules.toml."
+            )
+            return []
 
-            # Open a new window to display categories
-            category_window = tk.Toplevel(self.master)
-            category_window.title("Categories")
-            category_window.geometry("400x500+300+100")
-            category_text = tk.Text(category_window, wrap=tk.WORD, relief="flat")
-            category_text.pack(fill=tk.BOTH, expand=True, padx=15, pady=15)
-            category_text.insert(tk.END, "\n".join(categories))
+    def show_category_names(self):
+        categories = self.get_category_names()
+        self._show_list_in_window(categories, "Categories from lectures.csv")
+
+    def get_category_names_from_toml(self):
+        categories = self.toml_data.get_all_category_names()
+        categories = sorted(categories)
+        return categories
+
+    def show_category_names_from_toml(self):
+        categories = self.get_category_names_from_toml()
+        self._show_list_in_window(categories, "Categories from rules.toml")
+
+    def _show_list_in_window(self, items, title, height=400, width=300):
+        window = tk.Toplevel(self.master)
+        window.title(title)
+        window.geometry(f"{width}x{height}+300+100")
+        text_widget = tk.Text(window, wrap=tk.WORD, relief="flat")
+        text_widget.pack(fill=tk.BOTH, expand=True, padx=15, pady=15)
+        text_widget.insert(tk.END, "\n".join(items))
+
+    def check_category_names(self):
+        csv_categories = set(self.get_category_names())
+        toml_categories = set(self.get_category_names_from_toml())
+        missing_in_toml = csv_categories - toml_categories
+        self._show_list_in_window(
+            sorted(missing_in_toml),
+            "Categories in lectures.csv but not in rules.toml",
+            height=200,
+            width=400,
+        )
 
     def reset_to_default(self):
         self.load_toml()

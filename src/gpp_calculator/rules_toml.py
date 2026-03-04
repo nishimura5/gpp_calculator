@@ -79,6 +79,13 @@ class Rules:
     def get_secondaty_categories(self):
         return self.toml.get("secondary_categories", {})
 
+    def get_all_category_names(self):
+        categories = self.get_categories()
+        category_names = []
+        for cat in categories:
+            category_names.extend(categories[cat]["category"])
+        return category_names
+
     def _check_font_exist(self, font_name):
         from tkinter import font
 
