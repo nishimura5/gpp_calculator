@@ -211,6 +211,7 @@ __marimo__/
 *.csv.bak
 *.xlsx
 *.toml
+*.txt
 src/log/
 
 # mac
