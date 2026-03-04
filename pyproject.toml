@@ -1,6 +1,6 @@
 [project]
 name = "gpp_calculator"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Grade point pool calculator"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -9,3 +9,23 @@ dependencies = [
     "toml>=0.10.2",
     "ttkthemes>=3.2.2",
 ]
+
+[dependency-groups]
+dev = [
+    "pyinstaller>=6.11.0",
+    "pyinstaller-versionfile>=2.1",
+    "pytest>=8.3",
+]
+
+[project.scripts]
+gpp-calculator = "gpp_calculator.cli:main"
+
+# Launch as a GUI application (do not show a console window on Windows)
+[project.gui-scripts]
+gpp-calculator-gui = "gpp_calculator.cli:main"
+
+[tool.hatch.version]
+path = "src/gpp_calculator/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/gpp_calculator"]
