@@ -5,8 +5,8 @@ from tkinter import messagebox, ttk
 
 import ttkthemes
 
-import rules_toml
-from lectures import Lectures
+from . import lectures, rules_toml
+from .input_formatting import preprocess
 
 IS_DARWIN = sys.platform.startswith("darwin")
 
@@ -19,7 +19,11 @@ class App(ttk.Frame):
         self.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
         # TOML file path
-        self.toml_file = os.path.join(os.path.dirname(__file__), "rules.toml")
+        if getattr(sys, "frozen", False):
+            root_path = os.path.dirname(sys.executable)
+        else:
+            root_path = os.path.dirname(os.path.abspath(__file__))
+        self.toml_file = os.path.join(root_path, "rules.toml")
         self.toml_data = rules_toml.Rules()
         self.toml_data.load_rules()
 
@@ -391,6 +395,9 @@ class App(ttk.Frame):
             try:
                 category_data["max_credits"] = int(vars_dict["max_credits"].get())
             except ValueError:
+                print(
+                    f"Warning: Invalid max credits for category '{category_name}'. Setting to 0."
+                )
                 category_data["max_credits"] = 0
 
             category_text = vars_dict["category"].get(1.0, tk.END).strip()
@@ -419,6 +426,9 @@ class App(ttk.Frame):
             try:
                 category_data["max_credits"] = int(vars_dict["max_credits"].get())
             except ValueError:
+                print(
+                    f"Warning: Invalid max credits for secondary category '{category_name}'. Setting to 0."
+                )
                 category_data["max_credits"] = 0
 
             category_text = vars_dict["category"].get(1.0, tk.END).strip()
@@ -437,9 +447,12 @@ class App(ttk.Frame):
         if "columns_in_lectures" in toml_data:
             root_path = os.path.dirname(os.path.abspath(__file__))
             lecture_csv_path = os.path.join(root_path, "lectures.csv")
-            lec = Lectures(
+            lectures_df = preprocess.read_lectures_csv(
+                lecture_csv_path, toml_data["params"]["csv_encoding"]
+            )
+            lec = lectures.Lectures(
                 toml_data,
-                lecture_csv_path,
+                lectures_df,
             )
             categories = lec.get_category_names(
                 toml_data["columns_in_lectures"]["category"]

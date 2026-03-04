@@ -6,7 +6,7 @@ def read_lectures_csv(lectures_csv_path, encoding):
 
     #### PROCESSING BELOW ####
     # "講義コード"と"履修年度"をconcatenateして"講義コード"を上書き更新
-    df["講義コード"] = df["講義コード"].astype(str) + "-" + df["履修年度"].astype(str)
+    # df["講義コード"] = df["講義コード"].astype(str) + "-" + df["履修年度"].astype(str)
     #### PROCESSING ABOVE ####
 
     return df

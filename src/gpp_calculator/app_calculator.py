@@ -5,11 +5,7 @@ from tkinter import ttk
 
 import ttkthemes
 
-import app_rules
-import calculator
-import icon_data
-from csv_export import export_csv
-from rules_toml import Rules
+from . import app_rules, calculator, csv_export, icon_data, rules_toml
 
 IS_DARWIN = sys.platform.startswith("darwin")
 
@@ -19,7 +15,7 @@ class App(ttk.Frame):
         super().__init__(master)
         master.title("GPP Calculator")
 
-        self.rules = Rules()
+        self.rules = rules_toml.Rules()
         self.rules.load_rules()
 
         head_frame = ttk.Frame(master)
@@ -112,7 +108,10 @@ class App(ttk.Frame):
         self.toml = self.rules.toml
 
     def check_csv_exist(self):
-        root_path = os.path.dirname(os.path.abspath(__file__))
+        if getattr(sys, "frozen", False):
+            root_path = os.path.dirname(sys.executable)
+        else:
+            root_path = os.path.dirname(os.path.abspath(__file__))
         lecture_csv_path = os.path.join(root_path, "lectures.csv")
         student_csv_path = os.path.join(root_path, "students.csv")
 
@@ -176,7 +175,7 @@ class App(ttk.Frame):
         self.export_btn["state"] = "disabled"
 
     def export(self):
-        export_csv(self.res_table, "results.csv")
+        csv_export.export_csv(self.res_table, "results.csv")
 
     def open_settings(self):
         dlg_modal = tk.Toplevel(self)
@@ -191,7 +190,10 @@ class App(ttk.Frame):
         self.wait_window(dlg_modal)
 
     def open_log_file(self, student_id):
-        current_dir = os.path.dirname(os.path.abspath(__file__))
+        if getattr(sys, "frozen", False):
+            current_dir = os.path.dirname(sys.executable)
+        else:
+            current_dir = os.path.dirname(os.path.abspath(__file__))
         log_path = "log"
         log_file = os.path.join(current_dir, log_path, f"{student_id}.txt")
         try:

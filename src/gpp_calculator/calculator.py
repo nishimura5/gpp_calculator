@@ -1,11 +1,13 @@
 import os
+import sys
 
 import pandas as pd
 
-import lectures
-from credit_pool import CreditPool
-from input_formatting import preprocess
-
+from . import (
+    credit_pool,
+    lectures,
+)
+from .input_formatting import preprocess
 
 def calc_gpt_score(toml, lectures_df, grade_df):
     t_categories = toml["categories"]
@@ -13,6 +15,14 @@ def calc_gpt_score(toml, lectures_df, grade_df):
     col = toml["columns_in_lectures"]
 
     log_str = ""
+
+    def _df_to_log_string(df, key_col):
+        return df.set_index(key_col).to_string(
+            max_rows=None,
+            max_cols=None,
+            line_width=None,
+        )
+
     pl = lectures.PersonalLectures(
         lectures_df,
         col["key"],
@@ -42,7 +52,7 @@ def calc_gpt_score(toml, lectures_df, grade_df):
     # CreditPool
     credit_pools = {}
     for k, v in secondary_categories.items():
-        credit_pools[k] = CreditPool(v["max_credits"], v["category"])
+        credit_pools[k] = credit_pool.CreditPool(v["max_credits"], v["category"])
 
     # concat用のDataFrameを作成、column名を揃える
     columns = lectures_df.columns
@@ -71,7 +81,7 @@ def calc_gpt_score(toml, lectures_df, grade_df):
         a_df, b_df = lectures.select_lecture_to_knapsack(
             home_lecture_df, float(max_credits), col
         )
-        log_str += str(a_df[use_cols].set_index(col["key"])) + "\n"
+        log_str += _df_to_log_string(a_df[use_cols], col["key"]) + "\n"
         total_point = a_df["point"].sum()
         total_credits = home_lecture_df[col["credit"]].sum()
 
@@ -99,7 +109,7 @@ def calc_gpt_score(toml, lectures_df, grade_df):
         )
         if len(b_df) > 0:
             log_str += "-------- Overflow --------\n"
-            log_str += str(b_df[use_cols].set_index(col["key"])) + "\n"
+            log_str += _df_to_log_string(b_df[use_cols], col["key"]) + "\n"
 
         gpts[k]["credits"] = total_credits
         gpts[k]["gpp"] = total_point
@@ -122,7 +132,7 @@ def calc_gpt_score(toml, lectures_df, grade_df):
     gpts["Overflow_pool"]["credits"] = pool_credits
     gpts["Overflow_pool"]["gpp"] = total_point
     log_str += "\n======== [Overflow Pool] ========\n"
-    log_str += str(pool_df[use_cols].set_index(col["key"])) + "\n"
+    log_str += _df_to_log_string(pool_df[use_cols], col["key"]) + "\n"
     if used_by_secondary_credits > 0:
         log_str += f"<To secondary categories: {used_by_secondary_credits * (-1):+}>\n"
     log_str += f"Points: {total_point:.1f}  Credits: {pool_credits}\n"
@@ -150,9 +160,16 @@ def extrapolate_by_gpa(toml, gpp, total_credits, gpa):
 
 
 def calc_all(toml, csv_encoding: str = "utf-8", progress_bar=None, master=None):
-    root_path = os.path.dirname(os.path.abspath(__file__))
+    if getattr(sys, "frozen", False):
+        root_path = os.path.dirname(sys.executable)
+    else:
+        root_path = os.path.dirname(os.path.abspath(__file__))
     lecture_csv_path = os.path.join(root_path, "lectures.csv")
     student_csv_path = os.path.join(root_path, "students.csv")
+    if not os.path.exists(lecture_csv_path) or not os.path.exists(student_csv_path):
+        raise FileNotFoundError(
+            "lectures.csv or students.csv not found in the application directory."
+        )
 
     log_path = os.path.join(root_path, "log")
     os.makedirs(log_path, exist_ok=True)
@@ -205,7 +222,7 @@ def calc_all(toml, csv_encoding: str = "utf-8", progress_bar=None, master=None):
             "gpp": 0,
             "gpa": 0,
             "total_credits": 0,
-            "extrapolate_gpt": 0,
+            "extrapolate_gpp": 0,
         }
 
         lecture_key_list = grade_df[lecture_key_col_name].unique().tolist()

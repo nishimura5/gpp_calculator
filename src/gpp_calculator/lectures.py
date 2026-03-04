@@ -101,9 +101,55 @@ class PersonalLectures:
     def set_grades(self, grades_df: pd.DataFrame):
         # convert SABC grades to GP
         grades_df = grades_df.copy()
-        grades_df = grades_df[grades_df[self.grade_col_name].isin(["Ｓ", "Ａ", "Ｂ", "Ｃ", "Ｆ", "S", "A", "B", "C", "F", "s", "a", "b", "c", "f", "4", "3", "2", "1", "0"])]
+        grades_df = grades_df[
+            grades_df[self.grade_col_name].isin(
+                [
+                    "Ｓ",
+                    "Ａ",
+                    "Ｂ",
+                    "Ｃ",
+                    "Ｆ",
+                    "S",
+                    "A",
+                    "B",
+                    "C",
+                    "F",
+                    "s",
+                    "a",
+                    "b",
+                    "c",
+                    "f",
+                    "4",
+                    "3",
+                    "2",
+                    "1",
+                    "0",
+                ]
+            )
+        ]
         grades_df["GP"] = grades_df[self.grade_col_name].map(
-            {"Ｓ": 4.0, "Ａ": 3.0, "Ｂ": 2.0, "Ｃ": 1.0, "Ｆ": 0.0, "S": 4.0, "A": 3.0, "B": 2.0, "C": 1.0, "F": 0.0, "s": 4.0, "a": 3.0, "b": 2.0, "c": 1.0, "f": 0.0, "4": 4.0, "3": 3.0, "2": 2.0, "1": 1.0, "0": 0.0}
+            {
+                "Ｓ": 4.0,
+                "Ａ": 3.0,
+                "Ｂ": 2.0,
+                "Ｃ": 1.0,
+                "Ｆ": 0.0,
+                "S": 4.0,
+                "A": 3.0,
+                "B": 2.0,
+                "C": 1.0,
+                "F": 0.0,
+                "s": 4.0,
+                "a": 3.0,
+                "b": 2.0,
+                "c": 1.0,
+                "f": 0.0,
+                "4": 4.0,
+                "3": 3.0,
+                "2": 2.0,
+                "1": 1.0,
+                "0": 0.0,
+            }
         )
         self.grades_df = grades_df
 

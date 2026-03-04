@@ -1,4 +1,5 @@
 import os
+import sys
 import tomllib
 
 import toml
@@ -7,7 +8,10 @@ import toml
 class Rules:
     def __init__(self):
         self.toml = None
-        root_path = os.path.dirname(os.path.abspath(__file__))
+        if getattr(sys, "frozen", False):
+            root_path = os.path.dirname(sys.executable)
+        else:
+            root_path = os.path.dirname(os.path.abspath(__file__))
         self.rules_toml_path = os.path.join(root_path, "rules.toml")
 
     def load_rules(self):

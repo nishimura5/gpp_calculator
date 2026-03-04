@@ -1,18 +1,33 @@
 import csv
 import os
+import sys
 import tomllib
+
 
 def export_csv(calc_res, file_path):
     if not calc_res:
         return
 
-    root_path = os.path.dirname(os.path.abspath(__file__))
+    if getattr(sys, "frozen", False):
+        root_path = os.path.dirname(sys.executable)
+    else:
+        root_path = os.path.dirname(os.path.abspath(__file__))
     rules_toml_path = os.path.join(root_path, "rules.toml")
     with open(rules_toml_path, "rb") as f:
         toml = tomllib.load(f)
 
-    with open(file_path, mode="w", newline="", encoding=toml["params"]["csv_encoding"]) as csvfile:
-        fieldnames = ["student_id", "student_name", "gpp", "gpa", "total_credits", "extrapolate_gpp", "credits_in_pool"]
+    with open(
+        file_path, mode="w", newline="", encoding=toml["params"]["csv_encoding"]
+    ) as csvfile:
+        fieldnames = [
+            "student_id",
+            "student_name",
+            "gpp",
+            "gpa",
+            "total_credits",
+            "extrapolate_gpp",
+            "credits_in_pool",
+        ]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
         writer.writeheader()
