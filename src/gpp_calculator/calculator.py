@@ -9,6 +9,7 @@ from . import (
 )
 from .input_formatting import preprocess
 
+
 def calc_gpt_score(toml, lectures_df, grade_df):
     t_categories = toml["categories"]
     secondary_categories = toml["secondary_categories"]
@@ -58,6 +59,13 @@ def calc_gpt_score(toml, lectures_df, grade_df):
     columns = lectures_df.columns
     columns = columns.append(append_cols)
     pool_df = pd.DataFrame(columns=columns)
+
+    # student_idをlog_strに追加
+    student_id_col_name = toml["columns_in_students"]["key"]
+    student_name_col_name = toml["columns_in_students"]["name"]
+    student_id = grade_df[student_id_col_name].values[0]
+    student_name = grade_df[student_name_col_name].values[0]
+    log_str += f"{student_id} {student_name}\n"
 
     used_by_secondary_credits = 0
     for k, v in t_categories.items():
