@@ -284,17 +284,24 @@ def select_lecture_to_knapsack(
     # Step 2: Select lectures to maximize points while staying within credit limit
     total_credits = 0
     idx = 0
+    next_idx = None
     for idx, row in sorted_df.iterrows():
         if total_credits + row[col_names["credit"]] > max_credits:
+            next_idx = idx
             break
         selected_df = pd.concat([selected_df, row.to_frame().T], ignore_index=False)
         total_credits += row[col_names["credit"]]
+    if next_idx is None:
+        next_idx = idx + 1
+    # for debugging
+    #print(f"Total credits after selection: {total_credits}")
 
     # Step 3: If we haven't reached the minimum credits, add one more lectures from idx
-    if total_credits < max_credits and idx + 1 < len(sorted_df):
-        idx += 1
-        selected_df = pd.concat([selected_df, sorted_df.loc[[idx]]], ignore_index=False)
-        total_credits += sorted_df.loc[idx, col_names["credit"]]
+    if total_credits < max_credits and next_idx < len(sorted_df):
+        selected_df = pd.concat(
+            [selected_df, sorted_df.loc[[next_idx]]], ignore_index=False
+        )
+        total_credits += sorted_df.loc[next_idx, col_names["credit"]]
 
     # Extract unselected lecture information
     unselected_df = sorted_df[~sorted_df.index.isin(selected_df.index)]
