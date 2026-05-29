@@ -1,17 +1,15 @@
 import os
-import sys
 import tomllib
 
 import toml
+
+from .runtime_path import get_runtime_root_path
 
 
 class Rules:
     def __init__(self):
         self.toml = None
-        if getattr(sys, "frozen", False):
-            root_path = os.path.dirname(sys.executable)
-        else:
-            root_path = os.path.dirname(os.path.abspath(__file__))
+        root_path = get_runtime_root_path()
         self.rules_toml_path = os.path.join(root_path, "rules.toml")
 
     def load_rules(self):

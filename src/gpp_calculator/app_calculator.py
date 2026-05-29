@@ -6,6 +6,7 @@ from tkinter import ttk
 import ttkthemes
 
 from . import app_rules, calculator, csv_export, icon_data, rules_toml
+from .runtime_path import get_runtime_root_path
 
 IS_DARWIN = sys.platform.startswith("darwin")
 
@@ -108,10 +109,7 @@ class App(ttk.Frame):
         self.toml = self.rules.toml
 
     def check_csv_exist(self):
-        if getattr(sys, "frozen", False):
-            root_path = os.path.dirname(sys.executable)
-        else:
-            root_path = os.path.dirname(os.path.abspath(__file__))
+        root_path = get_runtime_root_path()
         lecture_csv_path = os.path.join(root_path, "lectures.csv")
         student_csv_path = os.path.join(root_path, "students.csv")
 
@@ -190,10 +188,7 @@ class App(ttk.Frame):
         self.wait_window(dlg_modal)
 
     def open_log_file(self, student_id):
-        if getattr(sys, "frozen", False):
-            current_dir = os.path.dirname(sys.executable)
-        else:
-            current_dir = os.path.dirname(os.path.abspath(__file__))
+        current_dir = get_runtime_root_path()
         log_path = "log"
         log_file = os.path.join(current_dir, log_path, f"{student_id}.txt")
         try:

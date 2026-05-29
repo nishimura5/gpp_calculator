@@ -1,5 +1,4 @@
 import os
-import sys
 
 import pandas as pd
 
@@ -8,6 +7,7 @@ from . import (
     lectures,
 )
 from .input_formatting import preprocess
+from .runtime_path import get_runtime_root_path
 
 
 def calc_gpt_score(toml, lectures_df, grade_df):
@@ -168,10 +168,7 @@ def extrapolate_by_gpa(toml, gpp, total_credits, gpa):
 
 
 def calc_all(toml, csv_encoding: str = "utf-8", progress_bar=None, master=None):
-    if getattr(sys, "frozen", False):
-        root_path = os.path.dirname(sys.executable)
-    else:
-        root_path = os.path.dirname(os.path.abspath(__file__))
+    root_path = get_runtime_root_path()
     lecture_csv_path = os.path.join(root_path, "lectures.csv")
     student_csv_path = os.path.join(root_path, "students.csv")
     if not os.path.exists(lecture_csv_path) or not os.path.exists(student_csv_path):

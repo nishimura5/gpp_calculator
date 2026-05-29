@@ -7,6 +7,7 @@ import ttkthemes
 
 from . import lectures, rules_toml
 from .input_formatting import preprocess
+from .runtime_path import get_runtime_root_path
 
 IS_DARWIN = sys.platform.startswith("darwin")
 
@@ -19,10 +20,7 @@ class App(ttk.Frame):
         self.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
         # TOML file path
-        if getattr(sys, "frozen", False):
-            root_path = os.path.dirname(sys.executable)
-        else:
-            root_path = os.path.dirname(os.path.abspath(__file__))
+        root_path = get_runtime_root_path()
         self.toml_file = os.path.join(root_path, "rules.toml")
         self.toml_data = rules_toml.Rules()
         self.toml_data.load_rules()
@@ -459,7 +457,7 @@ class App(ttk.Frame):
     def get_category_names(self):
         toml_data = self.toml_data.get_toml()
         if "columns_in_lectures" in toml_data:
-            root_path = os.path.dirname(os.path.abspath(__file__))
+            root_path = get_runtime_root_path()
             lecture_csv_path = os.path.join(root_path, "lectures.csv")
             lectures_df = preprocess.read_lectures_csv(
                 lecture_csv_path, toml_data["params"]["csv_encoding"]

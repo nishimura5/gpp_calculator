@@ -1,17 +1,15 @@
 import csv
 import os
-import sys
 import tomllib
+
+from .runtime_path import get_runtime_root_path
 
 
 def export_csv(calc_res, file_path):
     if not calc_res:
         return
 
-    if getattr(sys, "frozen", False):
-        root_path = os.path.dirname(sys.executable)
-    else:
-        root_path = os.path.dirname(os.path.abspath(__file__))
+    root_path = get_runtime_root_path()
     rules_toml_path = os.path.join(root_path, "rules.toml")
     with open(rules_toml_path, "rb") as f:
         toml = tomllib.load(f)
